@@ -1,0 +1,1 @@
+from .MALApiWrapper import MALApiWrapper
