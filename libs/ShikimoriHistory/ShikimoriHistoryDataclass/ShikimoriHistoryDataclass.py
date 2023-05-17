@@ -1,19 +1,20 @@
 from dataclasses import dataclass
 import arrow
-from .ShikimoriHistoryEnums import *
+from ..ShikimoriHistoryEnum.ShikimoriHistoryEnums import *
 
 
 @dataclass
 class HistoryChangeType:
-    status: list[AnimeStatus, AnimeStatus]
-    score: list[int, int]
-    episodes: list[int, int]
+    status: list[AnimeStatus, AnimeStatus] | None
+    score: list[int, int] | None
+    episodes: list[int, int] | None
     add_or_remove: AddOrRemove = AddOrRemove.none
 
 
 @dataclass
 class History:
-    anime_id: int
+    history_type: HistoryType
+    object_id: int
     history_time: arrow.arrow.Arrow
     history_id: int
     history_change: HistoryChangeType

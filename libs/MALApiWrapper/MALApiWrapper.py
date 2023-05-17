@@ -5,7 +5,7 @@ from .dataclass.MALTokenDataclass import MALTokenInfo
 from .enum.MALApiWrapperEnum import HttpMethod, MALAnimeWatchStatus
 from .dataclass.MALApiWrapperDataclass import MALAnimeInfo
 from .utils.MALTokenDataclassUtils import convert_dict_to_MALAnimeInfo
-from .exception.MALWrapperException import MALAnimeNotFound, MALAddToListError, MALRequestError
+from .exception.MALWrapperException import MALAnimeNotFound, MALAddToListError, MALRequestError, MALDeleteError
 
 
 class MALApiWrapper:
@@ -61,7 +61,7 @@ class MALApiWrapper:
             comments=comments
         )
         if r is None:
-            raise MALRequestError
+            raise MALRequestError()
 
         match r.status_code:
             case 200:
@@ -70,6 +70,21 @@ class MALApiWrapper:
                 raise MALAnimeNotFound(f"Anime with id {anime_id} doesn't exist", anime_id)
             case _:
                 raise MALAddToListError(f"Error to add anime to list", r.status_code, r.json())
+
+    def delete_anime_from_list(self, anime_id: int):
+
+        r = self.__fetch_api(
+            f"https://api.myanimelist.net/v2/anime/{anime_id}/my_list_status",
+            HttpMethod.delete
+        )
+        if r is None:
+            raise MALRequestError()
+
+        match r.status_code:
+            case 200:
+                return True
+            case 404:
+                raise MALDeleteError(anime_id)
 
     def __fetch_api(self, url: str, method: HttpMethod, **kwargs):
         match method:

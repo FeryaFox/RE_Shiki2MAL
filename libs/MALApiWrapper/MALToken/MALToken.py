@@ -6,6 +6,7 @@ from ..dataclass.MALTokenDataclass import MALTokenInfo
 
 # TODO добавить поддержку веб сервера
 
+
 # Авторизация была подсмотрена туть https://gitlab.com/-/snippets/2039434
 class MALToken:
     def __init__(
@@ -22,17 +23,8 @@ class MALToken:
         self.expires_in = None
         self.access_token = None
         self.refresh_token = None
-
-        if token_info_loader_func is None:
-            self.token_loader = token_loader
-        else:
-            self.token_loader = token_info_loader_func
-
-        if token_info_saver_func is None:
-            self.token_saver = token_saver
-        else:
-            self.token_saver = token_info_saver_func
-
+        self.token_loader = token_loader if token_info_loader_func is None else token_info_loader_func
+        self.token_saver = token_saver if token_info_saver_func is None else token_info_loader_func
         self.token_saver_loader_params = token_saver_loader_params
 
     def init_token(self):

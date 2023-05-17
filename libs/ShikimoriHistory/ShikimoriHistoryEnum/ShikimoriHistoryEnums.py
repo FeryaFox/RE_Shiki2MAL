@@ -14,3 +14,10 @@ class AnimeStatus(Enum):
     completed = "completed"
     on_hold = "on_hold"
     dropped = "dropped"
+    none = "none"
+
+
+class HistoryType(Enum):
+    ranobe = "ranobe"
+    anime = "anime"
+    manga = "manga"

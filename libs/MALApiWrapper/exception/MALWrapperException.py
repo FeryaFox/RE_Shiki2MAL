@@ -14,3 +14,7 @@ class MALAddToListError(Exception):
 class MALRequestError(Exception):
     def __init__(self):
         self.txt = "Error to send request"
+
+class MALDeleteError(Exception):
+    def __init__(self, anime_id):
+        self.anime_id = anime_id
