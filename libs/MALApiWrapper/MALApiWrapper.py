@@ -1,11 +1,10 @@
 import requests
-from typing import Callable
 from .MALToken import MALToken
-from .dataclass.MALTokenDataclass import MALTokenInfo
 from .enum.MALApiWrapperEnum import HttpMethod, MALAnimeWatchStatus
 from .dataclass.MALApiWrapperDataclass import MALAnimeInfo
 from .utils.MALTokenDataclassUtils import convert_dict_to_MALAnimeInfo
 from .exception.MALWrapperException import MALAnimeNotFound, MALAddToListError, MALRequestError, MALDeleteError
+from .MALToken.MALTokenSaverLoader import BaseMalTokenInfoSaverLoader
 
 
 class MALApiWrapper:
@@ -14,8 +13,7 @@ class MALApiWrapper:
             self,
             client_id,
             client_secret,
-            token_info_loader_func: None | Callable[[], MALTokenInfo | None] = None,
-            token_info_saver_func: None | Callable[[MALTokenInfo], None] = None,
+            token_info_saver_loader: None | BaseMalTokenInfoSaverLoader = None,
             token_saver_loader_params: None | dict = None
     ):
         self.client_id = client_id
@@ -24,8 +22,7 @@ class MALApiWrapper:
         self.token = MALToken(
             client_id,
             client_secret,
-            token_info_loader_func,
-            token_info_saver_func,
+            token_info_saver_loader,
             token_saver_loader_params
         )
         self.token.init_token()

@@ -1,7 +1,6 @@
 import requests
 import secrets
-from typing import Callable
-from .MALTokenSaverLoader import token_saver, token_loader
+from .MALTokenSaverLoader import StandartMalTokenInfoSaverLoader, BaseMalTokenInfoSaverLoader
 from ..dataclass.MALTokenDataclass import MALTokenInfo
 
 # TODO добавить поддержку веб сервера
@@ -13,8 +12,7 @@ class MALToken:
             self,
             client_id,
             client_secret,
-            token_info_loader_func: None | Callable[[None | dict], MALTokenInfo | None] = None,
-            token_info_saver_func: None | Callable[[MALTokenInfo, None | dict], None] = None,
+            token_info_saver_loader: None | BaseMalTokenInfoSaverLoader = None,
             token_saver_loader_params: None | dict = None
     ):
         self.client_id = client_id
@@ -23,9 +21,8 @@ class MALToken:
         self.expires_in = None
         self.access_token = None
         self.refresh_token = None
-        self.token_loader = token_loader if token_info_loader_func is None else token_info_loader_func
-        self.token_saver = token_saver if token_info_saver_func is None else token_info_loader_func
-        self.token_saver_loader_params = token_saver_loader_params
+        token_saver_loader = StandartMalTokenInfoSaverLoader if token_info_saver_loader is None else token_info_saver_loader
+        self.token_saver_loader = token_saver_loader(params=token_saver_loader_params)
 
     def init_token(self):
         if self.token_type is None and self.expires_in is None and self.access_token is None and self.refresh_token is None:
@@ -70,7 +67,10 @@ class MALToken:
                 assert Exception
                 print(f"Error refreshing the access token: {response.text}")
 
-    def __load_token_info(self, token_info: MALTokenInfo | dict):
+    def __load_token_info(
+            self,
+            token_info: MALTokenInfo | dict
+    ):
         if isinstance(token_info, dict):
             self.expires_in = token_info["expires_in"]
             self.access_token = token_info["access_token"]
@@ -117,14 +117,8 @@ class MALToken:
         response.close()
         return token
 
-    def __load_token(self):
-        if self.token_saver_loader_params is None:
-            return self.token_loader()
-        else:
-            return self.token_loader(self.token_saver_loader_params)
+    def __load_token(self) -> MALTokenInfo:
+        return self.token_saver_loader.token_loader()
 
-    def __save_token(self, token_info: MALTokenInfo):
-        if self.token_saver_loader_params is None:
-            return self.token_saver(token_info)
-        else:
-            return self.token_saver(token_info, self.token_saver_loader_params)
+    def __save_token(self, token_info: MALTokenInfo) -> bool:
+        return self.token_saver_loader.token_saver(token_info)
