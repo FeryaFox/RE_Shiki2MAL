@@ -1,47 +1,89 @@
 import requests
 from bs4 import BeautifulSoup
-from fake_headers import Headers
 import arrow
 import re
 import json
-from .ShikimoriHistoryDataclass import History
-from .utils import convert_dict_to_dataclass
-from typing import Tuple
+from .dataclass import Histories
+from .utils import convert_dict_to_dataclass_history
+from .exception import ShikimoriEmptyHistory, ShikimoriGetHistoryError, ShikimoriProfileNotfound
+from dataclasses import dataclass
 
 
 class ShikimoriHistoryGetter:
+    @dataclass
+    class __SoupInfo:
+        soup: BeautifulSoup
+        next_page: bool
 
-    def __init__(self, username: str) -> None:
+    def __init__(
+            self,
+            username: str,
+            headers = None
+    ) -> None:
+        if headers is not None:
+            self.headers = headers
+        else:
+            self.headers = {
+                'Accept': '*/*',
+                'Connection': 'keep-alive',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/114.0',
+                'Accept-Language': 'en-US;q=0.5,en;q=0.3',
+                'Cache-Control': 'max-age=0',
+                'DNT': '1',
+                'Upgrade-Insecure-Requests': '1'
+            }
         self.username = username
-        self.headers = Headers(headers=True).generate()
 
-    def get_news(self, page: int = 1) -> Tuple[list[History], bool]:
+    def get_histories(
+            self,
+            page: int = 1
+    ) -> Histories:
         return self.__fetch_and_parse_history(page)
 
-    def get_all_news(self) -> list[History]:
+    def get_all_histories(self) -> Histories:
         page = 1
-        news = []
+        news = Histories([], False)
         next_page = True
         while next_page:
-            news_t, next_page = self.__fetch_and_parse_history(page)
-            news = news + news_t
-            if next_page:
+            # news_t, next_page = self.__fetch_and_parse_history(page)
+            history = self.__fetch_and_parse_history(page)
+            news.histories += history.histories
+            if history.next_page:
                 page += 1
+                continue
+            next_page = False
         return news
 
-    def __fetch_and_parse_history(self, page: int = 1) -> Tuple[list[History], bool]:
-        soup, next_page = self.__fetch_history(page)
-        if soup is None:
-            return [], False
-        history = self.__parse_history(soup)
+    def __fetch_and_parse_history(
+            self,
+            page: int = 1
+    ) -> Histories:
+        try:
+            soup_info = self.__fetch_history(page)
+        except ShikimoriEmptyHistory:
+            return Histories([], False)
+        history = self.__parse_history(soup_info.soup)
         r = []
         for i in history:
-            if (c := convert_dict_to_dataclass(i)) is not None:
+            if (c := convert_dict_to_dataclass_history(i)) is not None:
                 r.append(c)
-        return r, next_page
+        return Histories(r, soup_info.next_page)
 
-    def __fetch_history(self, page: int = 1) -> Tuple[BeautifulSoup, bool] | None:
-        r = requests.get(f"https://shikimori.one/{self.username}/history/logs/{page}.json", headers=self.headers)
+    def __fetch_history(
+            self,
+            page: int = 1
+    ) -> __SoupInfo | None:
+        r = requests.get(f"https://shikimori.me/{self.username}/history/logs/{page}.json", headers=self.headers)
+        match r.status_code:
+            # TODO откопать где-то ВСЕ коды
+            case 200:
+                pass
+            case 403:
+                ...
+            case 404:
+                raise ShikimoriProfileNotfound(self.username)
+            case _:
+                raise ShikimoriGetHistoryError(self.username, r.status_code)
 
         r_json = r.json()
         next_page = False
@@ -49,9 +91,8 @@ class ShikimoriHistoryGetter:
             next_page = True
         if r_json["content"] is not None:
             soup = BeautifulSoup(r_json["content"], "html.parser")
-            return soup, next_page
-        else:
-            return None
+            return self.__SoupInfo(soup, next_page)
+        raise ShikimoriEmptyHistory()
 
     @staticmethod
     def __parse_info_from_history(news: BeautifulSoup) -> dict:
@@ -71,7 +112,10 @@ class ShikimoriHistoryGetter:
         # print(json.loads(news.find("code").get_text()))
         return {"history_type": history_type, "history_id": history_id, "history_time": history_time, "object_id": object_id} | json.loads(news.find("code").get_text())
 
-    def __parse_history(self, news: BeautifulSoup) -> list:
+    def __parse_history(
+            self,
+            news: BeautifulSoup
+    ) -> list:
         r = news.find_all("div", {"class": "b-user_rate_log"})
         stories = []
         for i in r:

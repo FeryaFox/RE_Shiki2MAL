@@ -1,8 +1,8 @@
-from ..ShikimoriHistoryDataclass import History, HistoryChangeType
-from ..ShikimoriHistoryEnum import AddOrRemove, AnimeStatus, HistoryType
+from ..dataclass import History, HistoryChangeType
+from ..enum import AddOrRemove, AnimeStatus, HistoryType
 
 
-def convert_dict_to_dataclass(d: dict) -> History:
+def convert_dict_to_dataclass_history(d: dict) -> History:
     # TODO добавить поддержку манги и ранобэ
     if d["history_type"] == HistoryType.anime.value:
         status = None

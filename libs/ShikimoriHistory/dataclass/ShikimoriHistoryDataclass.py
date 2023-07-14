@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import arrow
-from ..ShikimoriHistoryEnum.ShikimoriHistoryEnums import *
+from ..enum.ShikimoriHistoryEnums import *
 
 
 @dataclass
@@ -18,3 +18,9 @@ class History:
     history_time: arrow.arrow.Arrow
     history_id: int
     history_change: HistoryChangeType
+
+
+@dataclass
+class Histories:
+    histories: list[History]
+    next_page: bool
