@@ -27,3 +27,11 @@ class ShikimoriGetHistoryError(Exception):
 
 class ShikimoriEmptyHistory(Exception):
     ...
+
+
+class ShikimoriTooManyRequests(Exception):
+    ...
+
+
+class ShikimoriForbidden(Exception):
+    ...

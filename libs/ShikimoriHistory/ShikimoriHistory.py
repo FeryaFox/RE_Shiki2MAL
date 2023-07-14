@@ -5,9 +5,13 @@ import re
 import json
 from .dataclass import Histories
 from .utils import convert_dict_to_dataclass_history
-from .exception import ShikimoriEmptyHistory, ShikimoriGetHistoryError, ShikimoriProfileNotfound
+from .exception import (ShikimoriEmptyHistory,
+                        ShikimoriGetHistoryError,
+                        ShikimoriProfileNotfound,
+                        ShikimoriTooManyRequests,
+                        ShikimoriForbidden)
 from dataclasses import dataclass
-
+import backoff
 
 class ShikimoriHistoryGetter:
     @dataclass
@@ -69,6 +73,14 @@ class ShikimoriHistoryGetter:
                 r.append(c)
         return Histories(r, soup_info.next_page)
 
+    @backoff.on_exception(
+        backoff.expo,
+        (
+            ShikimoriTooManyRequests
+        ),
+        max_time=10,
+        max_tries=20
+    )
     def __fetch_history(
             self,
             page: int = 1
@@ -79,9 +91,11 @@ class ShikimoriHistoryGetter:
             case 200:
                 pass
             case 403:
-                ...
+                raise ShikimoriForbidden()
             case 404:
                 raise ShikimoriProfileNotfound(self.username)
+            case 429:
+                raise ShikimoriTooManyRequests()
             case _:
                 raise ShikimoriGetHistoryError(self.username, r.status_code)
 
