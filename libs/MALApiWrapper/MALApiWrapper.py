@@ -6,6 +6,9 @@ from .utils.MALTokenDataclassUtils import convert_dict_to_MALAnimeInfo
 from .exception.MALWrapperException import MALAnimeNotFound, MALAddToListError, MALRequestError, MALDeleteError
 from .MALToken.MALTokenSaverLoader import BaseMalTokenInfoSaverLoader
 
+# TODO добавить поддержку web сервера для автоматичекского получения кода
+# TODO добавить поддержку хранения токенов в БД
+
 
 class MALApiWrapper:
 

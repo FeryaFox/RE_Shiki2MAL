@@ -1,32 +1,68 @@
-user_name = "ff146"
-
 
 # TODO побавить поддержку манги
 # TODO это так на будущее, сделать поддержку нескольких пользователей
 
-class LastHistoryIdSaverLoader:
+from config import Config
+from dataclasses import dataclass
+from enums.sources_and_target import Targets
+from libs.MALApiWrapper import MALApiWrapper
+from libs.ShikimoriHistory import ShikimoriHistoryGetter
+from storage import HistoryStorage
 
-    def __init__(self) -> None:
-        self.last_history_id = self.load_last_history_id()
+@dataclass
+class SyncPath:
+    target: Targets
+    source_username: str
+    target_username: str
+    target_object: object
+    source_object: ShikimoriHistoryGetter
+    source: str = "Shikimori"
 
-    def __str__(self) -> str:
-        return str(self.last_history_id)
 
-    @staticmethod
-    def save_last_history_id(news_id: int) -> None:
-        with open("last_id.txt", "w") as f:
-            f.write(str(news_id))
+def sync(last_history_storage: HistoryStorage, paths: dict[SyncPath]):
+    for i in paths:
+        last_history_id = last_history_storage.load_last_history_by_username(i.source_username)
+        history = i.source_object.get_all_histories()
+        if history.histories[0] == last_history_id:
+            continue
+        
 
-    @staticmethod
-    def load_last_history_id() -> int:
-        with open("last_id.txt", "r") as f:
-            return int(f.read())
+def load_sync_paths(config: Config) -> list[SyncPath]:
+    paths = []
+    for i in config.sync_paths:
+        for j in config.sync_paths[i]:
+            # TODO добавить поддержку нескольких источников
+
+            target_object = MALApiWrapper(
+                config.tokens["myanimelist"]["client_id"],
+                config.tokens["myanimelist"]["client_secret"],
+                token_saver_loader_params={"username": config.sync_paths[i][j]}
+            )
+
+            source_object = ShikimoriHistoryGetter(i)
+
+            paths.append(SyncPath(
+                target=j,
+                source="Shikimori",
+                source_username=i,
+                target_username=config.sync_paths[i][j],
+                target_object=target_object,
+                source_object=source_object
+            ))
+
+    return paths
 
 
 def main():
-    # s = ShikimoriHistoryGetter(user_name)
-    # s.get_news()
-    ...
+
+    config = Config()
+    config.load_config()
+
+    last_history_storage = HistoryStorage()
+
+    # arm server
+
+    paths = load_sync_paths(config)
 
 
 if __name__ == "__main__":

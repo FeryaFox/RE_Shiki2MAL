@@ -13,6 +13,7 @@ from .exception import (ShikimoriEmptyHistory,
 from dataclasses import dataclass
 import backoff
 
+
 class ShikimoriHistoryGetter:
     @dataclass
     class __SoupInfo:
@@ -28,10 +29,10 @@ class ShikimoriHistoryGetter:
             self.headers = headers
         else:
             self.headers = {
-                'Accept': '*/*',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
                 'Connection': 'keep-alive',
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/114.0',
-                'Accept-Language': 'en-US;q=0.5,en;q=0.3',
+                'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
                 'Cache-Control': 'max-age=0',
                 'DNT': '1',
                 'Upgrade-Insecure-Requests': '1'
@@ -49,7 +50,6 @@ class ShikimoriHistoryGetter:
         news = Histories([], False)
         next_page = True
         while next_page:
-            # news_t, next_page = self.__fetch_and_parse_history(page)
             history = self.__fetch_and_parse_history(page)
             news.histories += history.histories
             if history.next_page:
@@ -86,6 +86,7 @@ class ShikimoriHistoryGetter:
             page: int = 1
     ) -> __SoupInfo | None:
         r = requests.get(f"https://shikimori.me/{self.username}/history/logs/{page}.json", headers=self.headers)
+        print(r.text)
         match r.status_code:
             # TODO откопать где-то ВСЕ коды
             case 200:

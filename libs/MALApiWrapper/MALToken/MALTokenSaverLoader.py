@@ -34,7 +34,7 @@ class StandartMalTokenInfoSaverLoader(BaseMalTokenInfoSaverLoader):
             if self.params is None:
                 file_path = os.path.join(target_dir, 'token_mal.json')
             else:
-                file_path = os.path.join(target_dir, f'token_{self.params["user_id"]}.json')
+                file_path = os.path.join(target_dir, f'token_{self.params["username"]}.json')
 
             with open(file_path, 'r') as f:
                 data = json.load(f)
@@ -48,7 +48,7 @@ class StandartMalTokenInfoSaverLoader(BaseMalTokenInfoSaverLoader):
         if self.params is None:
             file_path = os.path.join(target_dir, 'token_mal.json')
         else:
-            file_path = os.path.join(target_dir, f'token_{self.params["user_id"]}.json')
+            file_path = os.path.join(target_dir, f'token_{self.params["username"]}.json')
 
         with open(file_path, 'w') as file:
             json.dump(convert_dataclass_to_dict(token_info), file, indent=4)
