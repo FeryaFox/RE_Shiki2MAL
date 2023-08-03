@@ -44,11 +44,19 @@ def convert_dict_to_dataclass_history(d: dict) -> History:
             else:
                 add_or_remove = AddOrRemove.remove
 
+        rewatches = None
+        if "rewatches" in d:
+            rewatches = [
+                d["rewatches"][0],
+                d["rewatches"][1]
+            ]
+
         hc = HistoryChangeType(
             status=status,
             score=score,
             episodes=episodes,
-            add_or_remove=add_or_remove
+            add_or_remove=add_or_remove,
+            rewatches=rewatches
         )
         r = History(
             history_type=HistoryType(d["history_type"]),

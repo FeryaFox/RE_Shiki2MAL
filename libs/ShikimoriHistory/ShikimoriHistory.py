@@ -29,15 +29,23 @@ class ShikimoriHistoryGetter:
             self.headers = headers
         else:
             self.headers = {
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'Accept': 'application/json, text/plain, */*',
                 'Connection': 'keep-alive',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/114.0',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0',
                 'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
-                'Cache-Control': 'max-age=0',
                 'DNT': '1',
-                'Upgrade-Insecure-Requests': '1'
+                'Upgrade-Insecure-Requests': '1',
+                'Host': 'shikimori.me',
+                'Referer': 'https://shikimori.me/FeryaFox/history/logs',
+                'Sec-Fetch-Dest': 'empty',
+                'Sec-Fetch-Mode': 'cors',
+                'Sec-Fetch-Site': 'same-origin',
+                'Sec-GPC': '1',
+                'TE': 'trailers',
+                'X-Requested-With': 'XMLHttpRequest'
             }
         self.username = username
+
 
     def get_histories(
             self,

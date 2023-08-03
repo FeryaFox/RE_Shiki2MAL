@@ -47,6 +47,8 @@ class MALApiWrapper:
         if status is not None:
             status = status.value
 
+        is_rewatching = "true" if is_rewatching else "false"
+
         r = self.__fetch_api(
             f"https://api.myanimelist.net/v2/anime/{anime_id}/my_list_status",
             HttpMethod.patch,

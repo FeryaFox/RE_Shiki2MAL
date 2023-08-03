@@ -254,3 +254,6 @@ index.html
 .fleet
 tt.py
 token_*.json
+test_pp.py
+shikimori_last_history.json
+config.yml

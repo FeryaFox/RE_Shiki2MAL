@@ -8,6 +8,7 @@ class HistoryChangeType:
     status: list[AnimeStatus, AnimeStatus] | None
     score: list[int, int] | None
     episodes: list[int, int] | None
+    rewatches: list[int, int] | None
     add_or_remove: AddOrRemove = AddOrRemove.none
 
 

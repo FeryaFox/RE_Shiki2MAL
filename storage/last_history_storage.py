@@ -14,20 +14,18 @@ class HistoryStorage:
                 data = json.load(f)
             return data
 
-        except FileNotFoundError:
-            return {}
+        except (FileNotFoundError, KeyError):
+            return 0
 
-    def load_last_history_by_username(self, username: str):
+    def load_last_history_by_username(self, username: str) -> int:
         try:
             with open(self.filename, "r") as f:
                 data = json.load(f)
             return data[username]
 
-        except FileNotFoundError:
-            return {}
-
-    def save_last_history_by_username(self, username: str, last_history_id: str):
-        data = {}
+        except (FileNotFoundError, KeyError):
+            return 0
+    def save_last_history_by_username(self, username: str, last_history_id: int):
         try:
             with open(self.filename, "r") as f:
                 data = json.load(f)
