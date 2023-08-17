@@ -94,7 +94,6 @@ class ShikimoriHistoryGetter:
             page: int = 1
     ) -> __SoupInfo | None:
         r = requests.get(f"https://shikimori.me/{self.username}/history/logs/{page}.json", headers=self.headers)
-        print(r.text)
         match r.status_code:
             # TODO откопать где-то ВСЕ коды
             case 200:
@@ -119,7 +118,6 @@ class ShikimoriHistoryGetter:
 
     @staticmethod
     def __parse_info_from_history(news: BeautifulSoup) -> dict:
-
         spans = news.find_all("span")
         history_id = spans[0].find_all("a")[0].get_text()[1:]
         time = news.find("time").get_attribute_list("datetime")
@@ -132,8 +130,14 @@ class ShikimoriHistoryGetter:
             case "animes":
                 history_type = "anime"
         object_id = re.findall('\d+', object_id_r)[0]
+
         # print(json.loads(news.find("code").get_text()))
-        return {"history_type": history_type, "history_id": history_id, "history_time": history_time, "object_id": object_id} | json.loads(news.find("code").get_text())
+        return {
+            "history_type": history_type,
+            "history_id": history_id,
+            "history_time": history_time,
+            "object_id": object_id
+        } | json.loads(news.find("code").get_text())
 
     def __parse_history(
             self,

@@ -15,11 +15,11 @@ def convert_dict_to_dataclass_history(d: dict) -> History:
             if d["id"][0] is None:
                 status = [
                     AnimeStatus.none,
-                    AnimeStatus.watching
+                    AnimeStatus.planned
                 ]
             else:
                 status = [
-                    AnimeStatus.watching,
+                    AnimeStatus.planned,
                     AnimeStatus.none
                 ]
 

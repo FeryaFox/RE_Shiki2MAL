@@ -1,7 +1,8 @@
 
 # TODO побавить поддержку манги
 # TODO это так на будущее, сделать поддержку нескольких пользователей
-
+import schedule
+import time
 from config import Config
 from dataclasses import dataclass
 from enums.sources_and_target import Targets
@@ -24,7 +25,7 @@ class SyncPath:
     source: str = "Shikimori"
 
 
-def sync(last_history_storage: HistoryStorage, paths: dict[SyncPath]):
+def sync(last_history_storage: HistoryStorage, paths: list[SyncPath]):
     for i in paths:
         last_history_id = last_history_storage.load_last_history_by_username(i.source_username)
         try:
@@ -49,9 +50,11 @@ def sync(last_history_storage: HistoryStorage, paths: dict[SyncPath]):
                                 mal_anime_status = convert_Shikimori_to_MALStatus(j.history_change.status[1]) if j.history_change.status is not None else None
                                 anime_statuses = j.history_change.status if j.history_change.status is not None else None
 
+                                rewatch_value = rewatch_value if rewatch_value is not None and rewatch_value >= 0 else 0
+
                                 print(j)
                                 if anime_statuses is not None and anime_statuses[1] == AnimeStatus.rewatching:
-                                    print(1)
+
                                     i.target_object.add_anime_to_list(
                                         j.object_id,
                                         MALAnimeWatchStatus.completed,
@@ -62,7 +65,6 @@ def sync(last_history_storage: HistoryStorage, paths: dict[SyncPath]):
                                     continue
 
                                 if anime_statuses is not None and anime_statuses[0] == AnimeStatus.rewatching:
-                                    print(0)
                                     i.target_object.add_anime_to_list(
                                         j.object_id,
                                         MALAnimeWatchStatus.completed,
@@ -86,6 +88,7 @@ def sync(last_history_storage: HistoryStorage, paths: dict[SyncPath]):
                             j.object_id
                         )
         last_history_storage.save_last_history_by_username(i.source_username, history[-1].history_id)
+
 
 def load_sync_paths(config: Config) -> list[SyncPath]:
     paths = []
@@ -113,17 +116,25 @@ def load_sync_paths(config: Config) -> list[SyncPath]:
     return paths
 
 
+def full_sync(config: Config, last_history_storage: HistoryStorage):
+    config.load_config()
+    paths = load_sync_paths(config)
+    sync(last_history_storage, paths)
+
+
 def main():
 
     config = Config()
     config.load_config()
 
     last_history_storage = HistoryStorage()
+    full_sync(config, last_history_storage)
+    # schedule.every(1).minutes.do(full_sync, config=config, last_history_storage=last_history_storage)
+    # #arm server
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(1)
 
-    # arm server
-
-    paths = load_sync_paths(config)
-    sync(last_history_storage, paths)
 
 if __name__ == "__main__":
     main()
