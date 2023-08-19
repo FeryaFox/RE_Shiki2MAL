@@ -128,12 +128,12 @@ def main():
     config.load_config()
 
     last_history_storage = HistoryStorage()
-    full_sync(config, last_history_storage)
-    # schedule.every(1).minutes.do(full_sync, config=config, last_history_storage=last_history_storage)
-    # #arm server
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(1)
+
+    schedule.every(1).minutes.do(full_sync, config=config, last_history_storage=last_history_storage)
+    #arm server
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 
 if __name__ == "__main__":
