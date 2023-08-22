@@ -1,8 +1,8 @@
 import requests
 from .MALToken import MALToken
-from .enum.MALApiWrapperEnum import HttpMethod, MALAnimeWatchStatus
-from .dataclass.MALApiWrapperDataclass import MALAnimeInfo
-from .utils.MALTokenDataclassUtils import convert_dict_to_MALAnimeInfo
+from .enum.MALApiWrapperEnum import HttpMethod, MALAnimeWatchStatus, MALMangaAndRanobeReadingStatus
+from .dataclass.MALApiWrapperDataclass import MALAnimeInfo, MALMangaInfo
+from .utils.MALTokenDataclassUtils import convert_dict_to_MALAnimeInfo, convert_dict_to_MALMangaInfo
 from .exception.MALWrapperException import MALAnimeNotFound, MALAddToListError, MALRequestError, MALDeleteError
 from .MALToken.MALTokenSaverLoader import BaseMalTokenInfoSaverLoader
 
@@ -62,6 +62,7 @@ class MALApiWrapper:
             tags=tags,
             comments=comments
         )
+
         if r is None:
             raise MALRequestError()
 
@@ -88,8 +89,67 @@ class MALApiWrapper:
             case 404:
                 raise MALDeleteError(anime_id)
 
+    def add_manga_to_list(
+            self,
+            manga_id: int,
+            status: MALMangaAndRanobeReadingStatus | None = None,
+            is_rereading: bool | None = None,
+            score: int | None = None,
+            num_volumes_read: int | None = None,
+            num_chapters_read: int | None = None,
+            priority: int | None = 1,
+            num_times_reread: int | None = None,
+            reread_value: int | None = None,
+            tags: str | None = None,
+            comments: str | None = None
+    ) -> MALMangaInfo:
+        if status is not None:
+            status = status.value
+
+        is_rereading = "true" if is_rereading else "false"
+        reread_value = 16 if reread_value is not None and reread_value > 16 else reread_value # TODO проверить надо ли это
+        r = self.__fetch_api(
+            f"https://api.myanimelist.net/v2/manga/{manga_id}/my_list_status",
+            HttpMethod.patch,
+            status=status,
+            is_rereading=is_rereading,
+            score=score,
+            num_volumes_read=num_volumes_read,
+            num_chapters_read=num_chapters_read,
+            priority=priority,
+            num_times_reread=num_times_reread,
+            reread_value=reread_value,
+            tags=tags,
+            comments=comments
+        )
+        if r is None:
+            raise MALRequestError()
+
+        match r.status_code:
+            case 200:
+                return convert_dict_to_MALMangaInfo(r.json())
+            case 404:
+                raise MALAnimeNotFound(f"Manga with id {manga_id} doesn't exist", manga_id)
+            case _:
+                raise MALAddToListError(f"Error to add anime to list", r.status_code, r.json())
+
+    def delete_manga_from_list(self, manga_id: int):
+
+        r = self.__fetch_api(
+            f"https://api.myanimelist.net/v2/manga/{manga_id}/my_list_status",
+            HttpMethod.delete
+        )
+        if r is None:
+            raise MALRequestError()
+
+        match r.status_code:
+            case 200:
+                return True
+            case 404:
+                raise MALDeleteError(manga_id_id)
+
     def __fetch_api(self, url: str, method: HttpMethod, **kwargs):
-        match method:
+        match method: # заменить вот это на стандартные Enum от requests
             case HttpMethod.get:
                 return requests.get(url, params=kwargs, headers={"Authorization": f"Bearer {self.token.access_token}"})
 

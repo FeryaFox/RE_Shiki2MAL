@@ -9,6 +9,14 @@ class MALAnimeWatchStatus(Enum):
     plan_to_watch = "plan_to_watch"
 
 
+class MALMangaAndRanobeReadingStatus(Enum):
+    reading = "reading"
+    completed = "completed"
+    on_hold = "on_hold"
+    dropped = "dropped"
+    plan_to_read = "plan_to_read"
+
+
 class HttpMethod(Enum):
     get = "get"
     post = "post"

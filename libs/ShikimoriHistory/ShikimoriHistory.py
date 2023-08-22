@@ -36,7 +36,7 @@ class ShikimoriHistoryGetter:
                 'DNT': '1',
                 'Upgrade-Insecure-Requests': '1',
                 'Host': 'shikimori.me',
-                'Referer': 'https://shikimori.me/FeryaFox/history/logs',
+                'Referer': f'https://shikimori.me/{username}/history/logs',
                 'Sec-Fetch-Dest': 'empty',
                 'Sec-Fetch-Mode': 'cors',
                 'Sec-Fetch-Site': 'same-origin',
@@ -45,7 +45,6 @@ class ShikimoriHistoryGetter:
                 'X-Requested-With': 'XMLHttpRequest'
             }
         self.username = username
-
 
     def get_histories(
             self,
@@ -129,6 +128,8 @@ class ShikimoriHistoryGetter:
                 history_type = "manga"
             case "animes":
                 history_type = "anime"
+            case "ranobe":
+                history_type = "ranobe"
         object_id = re.findall('\d+', object_id_r)[0]
 
         # print(json.loads(news.find("code").get_text()))

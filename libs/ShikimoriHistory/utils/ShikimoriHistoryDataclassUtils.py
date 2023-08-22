@@ -1,9 +1,36 @@
-from ..dataclass import History, HistoryChangeType
-from ..enum import AddOrRemove, AnimeStatus, HistoryType
+from ..dataclass import History, AnimeHistoryChangeType, MangaAndRanobeHistoryChangeType
+from ..enum import AddOrRemove, AnimeStatus, MangaAndRanobeStatus, HistoryType
+
+# TODO переписать вот это на pydantic
 
 
 def convert_dict_to_dataclass_history(d: dict) -> History:
-    # TODO добавить поддержку манги и ранобэ
+    score = None
+    if "score" in d:
+        score = [
+            d["score"][0],
+            d["score"][1]
+        ]
+    add_or_remove = AddOrRemove.none
+    if "id" in d:
+        if d["id"][0] is None:
+            add_or_remove = AddOrRemove.add
+        else:
+            add_or_remove = AddOrRemove.remove
+
+    rewatches = None
+    if "rewatches" in d:
+        rewatches = [
+            d["rewatches"][0],
+            d["rewatches"][1]
+        ]
+
+    text = None
+    if "text" in d:
+        text = [
+            d["text"][0],
+            d["text"][1]
+        ]
     if d["history_type"] == HistoryType.anime.value:
         status = None
         if "status" in d:
@@ -23,13 +50,6 @@ def convert_dict_to_dataclass_history(d: dict) -> History:
                     AnimeStatus.none
                 ]
 
-        score = None
-        if "score" in d:
-            score = [
-                d["score"][0],
-                d["score"][1]
-            ]
-
         episodes = None
         if "episodes" in d:
             episodes = [
@@ -37,32 +57,52 @@ def convert_dict_to_dataclass_history(d: dict) -> History:
                 d["episodes"][1]
             ]
 
-        add_or_remove = AddOrRemove.none
-        if "id" in d:
-            if d["id"][0] is None:
-                add_or_remove = AddOrRemove.add
-            else:
-                add_or_remove = AddOrRemove.remove
-
-        rewatches = None
-        if "rewatches" in d:
-            rewatches = [
-                d["rewatches"][0],
-                d["rewatches"][1]
-            ]
-
-        hc = HistoryChangeType(
+        hc = AnimeHistoryChangeType(
             status=status,
             score=score,
             episodes=episodes,
             add_or_remove=add_or_remove,
-            rewatches=rewatches
+            rewatches=rewatches,
+            text=text
         )
-        r = History(
-            history_type=HistoryType(d["history_type"]),
-            object_id=int(d["object_id"]),
-            history_time=d["history_time"],
-            history_id=int(d["history_id"]),
-            history_change=hc
+    elif d["history_type"] == HistoryType.manga.value or d["history_type"] == HistoryType.ranobe.value:
+        status = None
+        if "status" in d:
+            status = [
+                MangaAndRanobeStatus(d["status"][0]),
+                MangaAndRanobeStatus(d["status"][1])
+            ]
+        elif "id" in d:
+            if d["id"][0] is None:
+                status = [
+                    MangaAndRanobeStatus.none,
+                    MangaAndRanobeStatus.planned
+                ]
+            else:
+                status = [
+                    AnimeStatus.planned,
+                    AnimeStatus.none
+                ]
+
+        chapters = None
+        if "chapters" in d:
+            chapters = [
+                d["chapters"][0],
+                d["chapters"][1]
+            ]
+        hc = MangaAndRanobeHistoryChangeType(
+            status=status,
+            score=score,
+            chapters=chapters,
+            add_or_remove=add_or_remove,
+            rewatches=rewatches,
+            text=text
         )
-        return r
+    r = History(
+        history_type=HistoryType(d["history_type"]),
+        object_id=int(d["object_id"]),
+        history_time=d["history_time"],
+        history_id=int(d["history_id"]),
+        history_change=hc
+    )
+    return r

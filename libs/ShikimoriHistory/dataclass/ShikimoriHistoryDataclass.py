@@ -4,11 +4,22 @@ from ..enum.ShikimoriHistoryEnums import *
 
 
 @dataclass
-class HistoryChangeType:
+class AnimeHistoryChangeType:
     status: list[AnimeStatus, AnimeStatus] | None
     score: list[int, int] | None
     episodes: list[int, int] | None
     rewatches: list[int, int] | None
+    text: list[None | str, None | str] | None
+    add_or_remove: AddOrRemove = AddOrRemove.none
+
+
+@dataclass
+class MangaAndRanobeHistoryChangeType:
+    status: list[MangaAndRanobeStatus, MangaAndRanobeStatus] | None
+    score: list[int, int] | None
+    chapters: list[int, int] | None
+    rewatches: list[int, int] | None
+    text: list[None | str, None | str] | None
     add_or_remove: AddOrRemove = AddOrRemove.none
 
 
@@ -18,7 +29,7 @@ class History:
     object_id: int
     history_time: arrow.arrow.Arrow
     history_id: int
-    history_change: HistoryChangeType
+    history_change: AnimeHistoryChangeType | MangaAndRanobeHistoryChangeType
 
 
 @dataclass

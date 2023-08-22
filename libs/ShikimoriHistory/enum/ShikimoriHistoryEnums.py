@@ -17,6 +17,16 @@ class AnimeStatus(Enum):
     none = "none"
 
 
+class MangaAndRanobeStatus(Enum):
+    planned = "planned"
+    watching = "watching"
+    rewatching = "rewatching"
+    completed = "completed"
+    on_hold = "on_hold"
+    dropped = "dropped"
+    none = "none"
+
+
 class HistoryType(Enum):
     ranobe = "ranobe"
     anime = "anime"

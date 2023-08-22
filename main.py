@@ -7,12 +7,12 @@ from config import Config
 from dataclasses import dataclass
 from enums.sources_and_target import Targets
 from libs.MALApiWrapper import MALApiWrapper
-from libs.MALApiWrapper.enum.MALApiWrapperEnum import MALAnimeWatchStatus
+from libs.MALApiWrapper.enum.MALApiWrapperEnum import MALAnimeWatchStatus, MALMangaAndRanobeReadingStatus
 from libs.ShikimoriHistory import ShikimoriHistoryGetter
 from storage import HistoryStorage
 from libs.ShikimoriHistory.exception.fetch_exceptions import ShikimoriForbidden
-from libs.ShikimoriHistory.enum import HistoryType, AnimeStatus, AddOrRemove
-from utils.status_convert import convert_Shikimori_to_MALStatus
+from libs.ShikimoriHistory.enum import HistoryType, AnimeStatus, AddOrRemove, MangaAndRanobeStatus
+from utils.status_convert import convert_Shikimori_to_MALStatus, convert_Shikimori_to_MALStatus_manga
 
 
 @dataclass
@@ -44,6 +44,7 @@ def sync(last_history_storage: HistoryStorage, paths: list[SyncPath]):
                         match j.history_type:
                             case HistoryType.anime:
 
+                                text = j.history_change.text[1] if j.history_change.text is not None else None
                                 score = j.history_change.score[1] if j.history_change.score is not None else None
                                 num_watched_episodes = j.history_change.episodes[1] if j.history_change.episodes is not None else None
                                 rewatch_value = j.history_change.rewatches[1] if j.history_change.rewatches is not None else None
@@ -61,6 +62,7 @@ def sync(last_history_storage: HistoryStorage, paths: list[SyncPath]):
                                         is_rewatching=True,
                                         score=score,
                                         num_watched_episodes=num_watched_episodes,
+                                        comments=text
                                     )
                                     continue
 
@@ -71,7 +73,8 @@ def sync(last_history_storage: HistoryStorage, paths: list[SyncPath]):
                                         is_rewatching=False,
                                         score=score,
                                         num_watched_episodes=num_watched_episodes,
-                                        rewatch_value=rewatch_value
+                                        num_times_rewatched=rewatch_value,
+                                        comments=text
                                     )
                                     continue
 
@@ -80,13 +83,63 @@ def sync(last_history_storage: HistoryStorage, paths: list[SyncPath]):
                                     mal_anime_status,
                                     score=score,
                                     num_watched_episodes=num_watched_episodes,
-                                    rewatch_value=rewatch_value
+                                    num_times_rewatched=rewatch_value,
+                                    comments=text
                                 )
 
+                            case HistoryType.manga | HistoryType.ranobe:
+                                text = j.history_change.text[1] if j.history_change.text is not None else None
+                                score = j.history_change.score[1] if j.history_change.score is not None else None
+                                num_read_chapters = j.history_change.chapters[1] if j.history_change.chapters is not None else None
+                                reread_value = j.history_change.rewatches[1] if j.history_change.rewatches is not None else None
+                                mal_manga_status = convert_Shikimori_to_MALStatus_manga(
+                                    j.history_change.status[1]
+                                ) if j.history_change.status is not None else None
+                                manga_statuses = j.history_change.status if j.history_change.status is not None else None
+
+                                reread_value = reread_value if reread_value is not None and reread_value >= 0 else 0
+
+                                print(j)
+                                if manga_statuses is not None and manga_statuses[1] == MangaAndRanobeStatus.rewatching:
+                                    i.target_object.add_manga_to_list(
+                                        j.object_id,
+                                        MALMangaAndRanobeReadingStatus.reading,
+                                        is_rereading=True,
+                                        score=score,
+                                        num_chapters_read=num_read_chapters,
+                                        comments=text
+                                    )
+                                    continue
+
+                                if manga_statuses is not None and manga_statuses[0] == MangaAndRanobeStatus.rewatching:
+                                    i.target_object.add_manga_to_list(
+                                        j.object_id,
+                                        MALMangaAndRanobeReadingStatus.completed,
+                                        is_rereading=False,
+                                        score=score,
+                                        num_chapters_read=num_read_chapters,
+                                        num_times_reread=reread_value,
+                                        comments=text
+                                    )
+                                    continue
+
+                                i.target_object.add_manga_to_list(
+                                    j.object_id,
+                                    mal_manga_status,
+                                    score=score,
+                                    num_chapters_read=num_read_chapters,
+                                    num_times_reread=reread_value,
+                                    comments=text
+                                )
                     case AddOrRemove.remove:
-                        i.target_object.delete_anime_from_list(
-                            j.object_id
-                        )
+                        if j.history_type == HistoryType.anime:
+                            i.target_object.delete_anime_from_list(
+                                j.object_id
+                            )
+                        else:
+                            i.target_object.delete_manga_from_list(
+                                j.object_id
+                            )
         last_history_storage.save_last_history_by_username(i.source_username, history[-1].history_id)
 
 
@@ -128,12 +181,12 @@ def main():
     config.load_config()
 
     last_history_storage = HistoryStorage()
-
-    schedule.every(1).minutes.do(full_sync, config=config, last_history_storage=last_history_storage)
-    #arm server
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    full_sync(config, last_history_storage)
+    # schedule.every(1).minutes.do(full_sync, config=config, last_history_storage=last_history_storage)
+    # #arm server
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(1)
 
 
 if __name__ == "__main__":
