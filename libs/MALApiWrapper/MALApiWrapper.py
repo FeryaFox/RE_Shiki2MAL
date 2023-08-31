@@ -75,8 +75,7 @@ class MALApiWrapper:
                 raise MALAddToListError(f"Error to add anime to list", r.status_code, r.json())
 
     def delete_anime_from_list(self, anime_id: int):
-        rewatch_value = 5 if rewatch_value is not None and rewatch_value > 5 else rewatch_value
-        print(rewatch_value)
+
         r = self.__fetch_api(
             f"https://api.myanimelist.net/v2/anime/{anime_id}/my_list_status",
             HttpMethod.delete
