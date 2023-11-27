@@ -140,6 +140,7 @@ def sync(last_history_storage: HistoryStorage, paths: list[SyncPath]):
                             i.target_object.delete_manga_from_list(
                                 j.object_id
                             )
+                        
         last_history_storage.save_last_history_by_username(i.source_username, history[-1].history_id)
 
 

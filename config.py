@@ -20,7 +20,6 @@ class Config:
     #     services = []
     #     for i in self.sync_path:
 
-
     def __read_file(self):
 
         with open(self.config_filename, 'r') as file:
