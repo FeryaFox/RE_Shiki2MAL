@@ -1,10 +1,14 @@
+from models.History import HistoryChange
 
 
 class BaseSource:
-    url = ""
-    name = ""
-    parse_mode = "" # отвечает за то, каким образом будет происходить получение
-    def __int__(self, username):
+    url: str
+    name: str
+    require_tokens: [str]
+
+    def __init__(self, username: str, storage):
+        self.__storage = storage
         self.username = username
 
-    def get_histories(self) -> :
+    def get_histories_change(self) -> HistoryChange:
+        ...

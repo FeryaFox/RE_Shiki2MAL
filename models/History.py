@@ -5,7 +5,7 @@ from enums.WatchingReadingStatus import BaseStatus
 
 
 class HistoryChangeObject(BaseModel):
-    anime_id: int
+    anime_manga_ranobe_id: int
     history_change_type: HistoryChangeType
     change_status: [BaseStatus, BaseStatus]
     watching_reading_episodes: [int, int]
@@ -19,5 +19,5 @@ class HistoryChange(BaseModel):
     ip: AnyUrl
     app: str
     time: datetime
-    history_object: HistoryChangeObject
+    history_object: [HistoryChangeObject]
 
