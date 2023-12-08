@@ -11,6 +11,7 @@ class WrapperToken(Base):
     key: Mapped[str] = mapped_column(String())
     data: Mapped[str] = mapped_column(String())
 
+
 class WrapperInfo(Base):
     __tablename__ = 'wrapper_info'
     id: Mapped[int] = mapped_column(primary_key=True)
