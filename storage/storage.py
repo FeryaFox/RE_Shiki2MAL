@@ -1,11 +1,11 @@
 from sqlalchemy import create_engine
 from .models.base import Base
-from .storages.wrapper import WrapperSourceStorage, WrapperTargetStorage
+from .storages.path import PathStorage
+from .storages.wrapper import WrapperSourceStorage, WrapperTargetStorage, WrapperConfigStorage
 from .models.wrappers import WrapperInfo
 from sqlalchemy.schema import MetaData
 from sqlalchemy.orm import Session
 from sqlalchemy.engine import Engine
-
 
 
 class Storage:
@@ -26,4 +26,9 @@ class Storage:
 
     def create_wrapper_target_storage(self, wrapper_name: str) -> WrapperTargetStorage:
         return WrapperTargetStorage(wrapper_name, self.__engine)
-    # STOPHERE
+
+    def create_wrapper_config_storage(self) -> WrapperConfigStorage:
+        return WrapperConfigStorage(self.__engine)
+
+    def create_path_storage(self) -> PathStorage:
+        return PathStorage(self.__engine)

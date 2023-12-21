@@ -4,9 +4,9 @@ from models.History import HistoryChange
 class BaseSource:
     url: str
     name: str
-    require_tokens: [str]
+    require_settings: [str]
 
-    def __init__(self, username: str, storage):
+    def __init__(self, username: str, storage, log): # TODO logging (create class for logging)
         self.__storage = storage
         self.username = username
 

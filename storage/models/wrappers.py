@@ -27,8 +27,8 @@ class SourceData(Base):
     data: Mapped[str] = mapped_column(String())
 
 
-class SourceAuth(Base):
-    __tablename__ = "source_auth"
+class SourceConfig(Base):
+    __tablename__ = "source_config"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(30))
     key: Mapped[str] = mapped_column(String())
@@ -43,8 +43,8 @@ class TargetData(Base):
     data: Mapped[str] = mapped_column(String())
 
 
-class TargetAuth(Base):
-    __tablename__ = "target_auth"
+class TargetConfig(Base):
+    __tablename__ = "target_config"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(30))
     key: Mapped[str] = mapped_column(String())
