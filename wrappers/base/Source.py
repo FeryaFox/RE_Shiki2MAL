@@ -1,4 +1,4 @@
-from models.History import HistoryChange
+from models.History import HistoryChanges
 
 
 class BaseSource:
@@ -10,5 +10,5 @@ class BaseSource:
         self.__storage = storage
         self.username = username
 
-    def get_histories_change(self) -> HistoryChange:
+    def get_histories_change(self) -> HistoryChanges:
         ...
