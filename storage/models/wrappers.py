@@ -1,51 +1,50 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
+from sqlalchemy import ForeignKey
 from .base import Base
+from wrappers.enums import WrapperTypes, WrapperStatuses
 
 
-class WrapperToken(Base):
-    __tablename__ = 'wrapper_token'
+class Wrappers(Base):
+    __tablename__ = 'wrappers'
+
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(30))
-    key: Mapped[str] = mapped_column(String())
-    data: Mapped[str] = mapped_column(String())
-
-
-class WrapperInfo(Base):
-    __tablename__ = 'wrapper_info'
-    id: Mapped[int] = mapped_column(primary_key=True)
-    wrappers: Mapped[str] = mapped_column(String())
-    status: Mapped[int] = mapped_column()
+    wrapper_name: Mapped[str]
+    wrapper_type: Mapped[WrapperTypes]
+    status: Mapped[WrapperTypes]
 
 
 class SourceData(Base):
     __tablename__ = "source_data"
+
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(30))
-    key: Mapped[str] = mapped_column(String())
-    data: Mapped[str] = mapped_column(String())
+    wrapper_id: Mapped[int] = mapped_column(ForeignKey("wrappers.id"))
+    key: Mapped[str]
+    data: Mapped[str]
 
 
 class SourceConfig(Base):
     __tablename__ = "source_config"
+
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(30))
-    key: Mapped[str] = mapped_column(String())
-    data: Mapped[str] = mapped_column(String())
+    wrapper_id: Mapped[int] = mapped_column(ForeignKey("wrappers.id"))
+    key: Mapped[str]
+    data: Mapped[str]
 
 
 class TargetData(Base):
     __tablename__ = "target_data"
+
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(30))
-    key: Mapped[str] = mapped_column(String())
-    data: Mapped[str] = mapped_column(String())
+    wrapper_id: Mapped[int] = mapped_column(ForeignKey("wrappers.id"))
+    key: Mapped[str]
+    data: Mapped[str]
 
 
 class TargetConfig(Base):
     __tablename__ = "target_config"
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(30))
-    key: Mapped[str] = mapped_column(String())
-    data: Mapped[str] = mapped_column(String())
+    wrapper_id: Mapped[int] = mapped_column(ForeignKey("wrappers.id"))
+    key: Mapped[str]
+    data: Mapped[str]
