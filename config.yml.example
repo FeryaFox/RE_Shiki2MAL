@@ -1,0 +1,8 @@
+sync_path:
+  {Shikimori Username}:
+    myanimelist: {MyAnimeList Username}
+
+tokens:
+  myanimelist:
+    client_id: {MyAnimeList client_id}
+    client_secret: {MyAnimeList client_secret}
