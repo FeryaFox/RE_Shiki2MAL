@@ -18,11 +18,3 @@ class StorageController:
 
     def create_wrapper_target_storage(self, wrapper_name: str) -> WrapperStorage:
         return WrapperStorage(wrapper_name, self.__session, WrapperTypes.Target)
-
-    # def create_wrapper_controller_storage(self) ->
-
-    # def create_wrapper_config_storage(self) -> WrapperConfigStorage:
-    #     return WrapperConfigStorage(self.__engine)
-    #
-    # def create_path_storage(self) -> PathStorage:
-    #     return PathStorage(self.__engine)
