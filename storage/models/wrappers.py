@@ -12,39 +12,22 @@ class Wrappers(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     wrapper_name: Mapped[str]
     wrapper_type: Mapped[WrapperTypes]
-    status: Mapped[WrapperTypes]
+    status: Mapped[WrapperStatuses]
 
 
-class SourceData(Base):
-    __tablename__ = "source_data"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    wrapper_id: Mapped[int] = mapped_column(ForeignKey("wrappers.id"))
-    key: Mapped[str]
-    data: Mapped[str]
-
-
-class SourceConfig(Base):
-    __tablename__ = "source_config"
+class WrappersData(Base):
+    __tablename__ = "wrappers_data"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     wrapper_id: Mapped[int] = mapped_column(ForeignKey("wrappers.id"))
     key: Mapped[str]
-    data: Mapped[str]
+    value: Mapped[str]
 
 
-class TargetData(Base):
-    __tablename__ = "target_data"
+class WrappersConfig(Base):
+    __tablename__ = "wrappers_config"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     wrapper_id: Mapped[int] = mapped_column(ForeignKey("wrappers.id"))
     key: Mapped[str]
-    data: Mapped[str]
-
-
-class TargetConfig(Base):
-    __tablename__ = "target_config"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    wrapper_id: Mapped[int] = mapped_column(ForeignKey("wrappers.id"))
-    key: Mapped[str]
-    data: Mapped[str]
+    value: Mapped[str]

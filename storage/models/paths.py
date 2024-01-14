@@ -1,14 +1,14 @@
 from .base import Base
-from sqlalchemy import String, Boolean
+from sqlalchemy import String, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
+from wrappers.enums import PathStatus
 
-
-class Paths(Base):
-    __tablename__ = 'paths'
+class Path(Base):
+    __tablename__ = 'path'
     id: Mapped[int] = mapped_column(primary_key=True)
-    source: Mapped[str]
-    source_name: Mapped[str]
-    target: Mapped[str]
-    target_name: Mapped[str]
-    is_active: Mapped[bool]
+    source_wrapper_id: Mapped[int] = mapped_column(ForeignKey('wrapper.id'))
+    source_username: Mapped[str]
+    target_wrapper_id: Mapped[int] = mapped_column(ForeignKey('wrapper.id'))
+    target_username: Mapped[str]
+    status: Mapped[PathStatus]
