@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
 
-class Name:
+class Name(BaseModel):
     name: str
     language: str

@@ -3,6 +3,7 @@ from sqlalchemy import select, and_
 from wrappers.enums import WrapperTypes
 from storage.models.wrappers import Wrappers, WrappersData, WrappersConfig
 import json
+from ..utils import WrapperUtils
 
 
 class WrapperStorage:
@@ -169,22 +170,6 @@ class WrapperStorage:
     def __init__(self, wrapper_name: str, session: sessionmaker, wrapper_type: WrapperTypes):
         self.__session = session
         self.__wrapper_type = wrapper_type
-        self.__wrapper_id = self.__get_wrapper_id(wrapper_name)
+        self.__wrapper_id = WrapperUtils.get_wrapper_id(wrapper_name, wrapper_type, session)
         self.data = self.WrapperDataStorage(self.__wrapper_id, self.__session)
         self.config = self.WrapperConfigStorage(self.__wrapper_id, self.__session)
-
-    def __get_wrapper_id(self, wrapper_name) -> int | None:
-        with self.__session() as session:
-            query = (
-                select(
-                    Wrappers.id
-                )
-                .select_from(Wrappers)
-                .filter(
-                    Wrappers.wrapper_name == wrapper_name,
-                    Wrappers.wrapper_type == self.__wrapper_type
-                )
-
-            )
-            result = session.execute(query).fetchone()
-        return result[0] if result is not None else None

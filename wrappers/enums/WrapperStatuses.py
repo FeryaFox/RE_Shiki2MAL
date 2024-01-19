@@ -2,5 +2,6 @@ from enum import Enum
 
 
 class WrapperStatuses(Enum):
-    stopped = 0
-    running = 1
+    deleted = 0
+    enabled = 1
+    disabled = 2
