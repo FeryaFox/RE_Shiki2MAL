@@ -12,7 +12,7 @@ class Wrappers(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     wrapper_name: Mapped[str]
     wrapper_type: Mapped[WrapperTypes]
-    status: Mapped[WrapperStatuses]
+    wrapper_status: Mapped[WrapperStatuses]
 
 
 class WrappersData(Base):

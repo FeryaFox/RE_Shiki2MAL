@@ -55,12 +55,12 @@ class WrapperStorage:
                 session.commit()
                 return element
 
-        def __delitem__(self, key: str):
+        def __delitem__(self, key: str) -> None:
             with self.__session() as session:
                 session.query(WrappersData).filter_by(wrapper_id=self.__wrapper_id, key=key).delete()
                 session.commit()
 
-        def __str__(self):
+        def __str__(self) -> str:
             result = self.__get_all_data()
             res = {}
             for key, value in result:
@@ -83,8 +83,7 @@ class WrapperStorage:
             result = result if result != [] else None
             return result
 
-        def __iter__(self):
-            print(self.__get_all_data())
+        def __iter__(self) -> WrapperDataStorageIterator:
             return self.WrapperDataStorageIterator(self.__get_all_data())
 
     class WrapperConfigStorage:
@@ -122,23 +121,6 @@ class WrapperStorage:
                 )
                 result = session.execute(query).fetchone()
                 return result[0] if result is not None else None
-
-        def __setitem__(self, key: str, value: str):
-            with self.__session() as session:
-                element = session.query(WrappersConfig).filter_by(wrapper_id=self.__wrapper_id, key=key).first()
-                if element:
-                    element.value = value
-                else:
-                    element = WrappersConfig(wrapper_id=self.__wrapper_id, key=key, value=value)
-                    session.add(element)
-
-                session.commit()
-                return element
-
-        def __delitem__(self, key: str):
-            with self.__session() as session:
-                session.query(WrappersConfig).filter_by(wrapper_id=self.__wrapper_id, key=key).delete()
-                session.commit()
 
         def __str__(self):
             result = self.__get_all_data()

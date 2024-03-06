@@ -14,12 +14,12 @@ class Wrappers(TypedDict):
 
 class WrapperController:
     def __init__(self, wcs: WrapperControllerStorage):
+        self.__wcs = wcs
         self.__ignored_names = ["__init__.py"]
         self.__wrapper_dir = "wrappers"
         self.__wrappers_target = {}
         self.__wrappers_source = {}
         self.__load_wrappers()
-        self.__wcs = wcs
 
     def __load_wrappers(self) -> None:
         wrapper_dir_current = os.path.join(self.__wrapper_dir, "source")
@@ -27,7 +27,7 @@ class WrapperController:
             if wrapper_name in self.__ignored_names:
                 continue
             wrapper_obj = self.__get_wrapper_object(os.path.join(wrapper_dir_current, wrapper_name, f"{wrapper_name}.py"), wrapper_name)
-            print(wrapper_obj)
+            self.__wcs.register_wrapper(wrapper_obj.wrapper_name, WrapperTypes.Source)
             self.__wrappers_source |= {wrapper_obj.wrapper_name: wrapper_obj}
 
         wrapper_dir_current = os.path.join(self.__wrapper_dir, "target")
@@ -35,8 +35,18 @@ class WrapperController:
             if wrapper_name in self.__ignored_names:
                 continue
             wrapper_obj = self.__get_wrapper_object(
-                os.path.join(wrapper_dir_current, wrapper_name, f"{wrapper_name}.py"), wrapper_name)
+                os.path.join(
+                    wrapper_dir_current,
+                    wrapper_name,
+                    f"{wrapper_name}.py"
+                ), wrapper_name)
+            self.__wcs.register_wrapper(wrapper_obj.wrapper_name, WrapperTypes.Target)
             self.__wrappers_target |= {wrapper_obj.wrapper_name: wrapper_obj}
+
+        self.__wcs.set_delete_wrapper_not_from_list(
+            [{"name": i, "type": WrapperTypes.Target} for i in self.__wrappers_target] +
+            [{"name": i, "type": WrapperTypes.Source} for i in self.__wrappers_source]
+        )
 
     def get_wrapper_name_list(self) -> Wrappers:
         return {
@@ -45,7 +55,6 @@ class WrapperController:
         }
 
     def get_wrapper(self, wrapper_name: str, wrapper_type: WrapperTypes) -> BaseTarget | BaseSource | None:
-
         if wrapper_type == WrapperTypes.Target and wrapper_name in self.__wrappers_target:
             return self.__wrappers_target[wrapper_name]
         elif wrapper_type == WrapperTypes.Source and wrapper_name in self.__wrappers_source:
@@ -96,4 +105,3 @@ class WrapperController:
         plugin_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(plugin_module)
         return getattr(plugin_module, wrapper_name)
-
